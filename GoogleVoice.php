@@ -117,7 +117,6 @@ class GoogleVoice
 			{
 				if( in_array('unread', $convo->labels) )
 				{
-					#pa($convo);
 					foreach($elements as $i=>$element)
 					{
 						$XMsgFrom = $xpath->query("span[@class='gc-message-sms-from']", $element);
