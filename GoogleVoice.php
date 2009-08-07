@@ -22,6 +22,12 @@ class GoogleVoice
 		$this->_pass = $pass;
 
 		$this->_cookieFile = '/tmp/gvCookies.txt';
+
+		$this->_ch = curl_init();
+		curl_setopt($this->_ch, CURLOPT_COOKIEJAR, $this->_cookieFile);
+		curl_setopt($this->_ch, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
+		curl_setopt($this->_ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)");
 	}
 	
 	private function _logIn()
@@ -31,16 +37,13 @@ class GoogleVoice
 		if( $this->_loggedIn )
 			return TRUE;
 		
-		$this->_ch = curl_init('https://www.google.com/accounts/ServiceLoginAuth');
-		curl_setopt($this->_ch, CURLOPT_COOKIEJAR, $this->_cookieFile);
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/accounts/ServiceLoginAuth');
 		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
 			'Email'=>$this->_login,
 			'Passwd'=>$this->_pass,
 			'continue'=>'https://www.google.com/voice/account/signin'
 			));
-		curl_setopt($this->_ch, CURLOPT_FOLLOWLOCATION, TRUE);
-		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
 	
 		$html = curl_exec($this->_ch);
 		if( preg_match('/name="_rnr_se".*?value="(.*?)"/', $html, $match) )
@@ -136,7 +139,7 @@ class GoogleVoice
 							foreach($XMsgTime as $m)
 								$msgTime = trim($m->nodeValue);
 	
-							$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$msgText, 'date'=>date('Y-m-d H:i:s', strtotime(date('d/m/Y ',intval($convo->startTime/1000)).$msgTime)));
+							$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$msgText, 'date'=>date('Y-m-d H:i:s', strtotime(date('m/d/Y ',intval($convo->startTime/1000)).$msgTime)));
 						}
 					}
 				}
