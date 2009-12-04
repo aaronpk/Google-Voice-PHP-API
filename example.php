@@ -4,7 +4,7 @@ include('GoogleVoice.php');
 $gv = new GoogleVoice('your.name', 'password');
 
 // call a phone from one of your forwarding phones
-$gv->callNumber('9995551212', '5558675309');
+$gv->callNumber('9995551212', '5558675309', 'mobile');
 
 // send an SMS to a phone number
 $gv->sendSMS('9995551212', 'Sending a message!');
