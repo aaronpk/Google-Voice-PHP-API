@@ -69,10 +69,22 @@ class GoogleVoice
 
 	/**
 	 * Place a call to $number connecting first to $fromNumber
-	 * Both numbers should be given as 10 digits with no punctuation
+	 * @param $number The 10-digit phone number to call (formatted with parens and hyphens or none)
+	 * @param $fromNumber The 10-digit number on your account to connect the call (no hyphens or spaces)
+	 * @param $phoneType (mobile, work, home, gizmo) The type of phone the $fromNumber is. The call will not be connected without this value. 
 	 */
-	public function callNumber($number, $fromNumber)
+	public function callNumber($number, $fromNumber, $phoneType='mobile')
 	{
+		$types = array(
+			'mobile' => 2,
+			'work' => 3,
+			'home' => 1,
+			'gizmo' => 7
+		);
+	
+		if(!array_key_exists($phoneType, $types))
+			throw new Exception('Phone type must be mobile, work, home or gizmo');
+		
 		$this->_logIn();
 		
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/call/connect/');
@@ -81,7 +93,7 @@ class GoogleVoice
 			'_rnr_se'=>$this->_rnr_se,
 			'forwardingNumber'=>'+1' . $fromNumber,
 			'outgoingNumber'=>$number,
-			'phoneType'=>3, // not sure what this means, but 3 seems to work!
+			'phoneType'=>$types[$phoneType],
 			'remember'=>0,
 			'subscriberNumber'=>'undefined'
 			));
