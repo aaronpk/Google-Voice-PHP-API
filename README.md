@@ -13,6 +13,16 @@ Note: Receiving SMSs and voicemails is mostly unnecessary via this API
 since Google now allows SMSs to be forwarded to an email address. It is 
 a better idea to parse those incoming emails with a script.
 
+SMS and Voice Integration
+=========================
+
+For better SMS and voice integration with your web app, check out Tropo
+at http://tropo.com. Tropo is free for development, and you will get 
+better results than using unsupported Google Voice API calls. 
+
+Check out some sample apps built with Tropo:
+https://www.tropo.com/docs/scripting/tutorials.htm
+
 Disclaimer
 ==========
 
