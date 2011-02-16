@@ -17,11 +17,10 @@ SMS and Voice Integration
 =========================
 
 For better SMS and voice integration with your web app, check out Tropo
-at http://tropo.com. Tropo is free for development, and you will get 
+at [tropo.com](http://tropo.com). Tropo is free for development, and you will get 
 better results than using unsupported Google Voice API calls. 
 
-Check out some sample apps built with Tropo:
-https://www.tropo.com/docs/scripting/tutorials.htm
+Check out some [sample apps built with Tropo](https://www.tropo.com/docs/scripting/tutorials.htm)
 
 Disclaimer
 ==========
@@ -34,7 +33,7 @@ License
 =======
 
 Copyright 2009 by Aaron Parecki
-http://aaronparecki.com
+[http://aaronparecki.com](http://aaronparecki.com)
 
 See LICENSE
 
