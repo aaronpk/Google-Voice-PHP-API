@@ -103,6 +103,11 @@ class GoogleVoice {
 		curl_exec($this->_ch);
 	}
 
+	/**
+	 * Send an SMS to $number containing $message.
+	 * @param $number The 10-digit phone number to send the message to (formatted with parens and hyphens or none).
+	 * @param $message The message to send within the SMS.
+	 */
 	public function sendSMS($number, $message) {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -118,6 +123,11 @@ class GoogleVoice {
 		curl_exec($this->_ch);
 	}
 
+	/**
+	 * Add a note to a message in a Google Voice Inbox or Voicemail.
+	 * @param $message_id The id of the message to update.
+	 * @param $note The message to send within the SMS.
+	 */
 	public function addNote($message_id, $note) {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -132,7 +142,10 @@ class GoogleVoice {
 			));
 		curl_exec($this->_ch);
 	}
-	
+
+	/**
+	 * Get all of the unread SMS messages in a Google Voice inbox.
+	 */
 	public function getUnreadSMS() {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -159,6 +172,9 @@ class GoogleVoice {
 		return $results;
 	}
 
+	/**
+	 * Get all of the read SMS messages in a Google Voice inbox.
+	 */
 	public function getReadSMS() {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -185,6 +201,9 @@ class GoogleVoice {
 		return $results;
 	}
 
+	/**
+	 * Get all of the unread SMS messages from a Google Voice Voicemail.
+	 */
 	public function getUnreadVoicemail() {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -211,6 +230,9 @@ class GoogleVoice {
 		return $results;
 	}
 
+	/**
+	 * Get all of the unread SMS messages from a Google Voice Voicemail.
+	 */
 	public function getReadVoicemail() {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -237,6 +259,11 @@ class GoogleVoice {
 		return $results;
 	}
 
+	/**
+	 * Mark a message in a Google Voice Inbox or Voicemail as read.
+	 * @param $message_id The id of the message to update.
+	 * @param $note The message to send within the SMS.
+	 */
 	public function markMessageRead($message_id) {
 		// Login to the service if not already done.
 		$this->_logIn();
@@ -252,6 +279,11 @@ class GoogleVoice {
 		curl_exec($this->_ch);
 	}
 
+	/**
+	 * Mark a message in a Google Voice Inbox or Voicemail as unread.
+	 * @param $message_id The id of the message to update.
+	 * @param $note The message to send within the SMS.
+	 */
 	public function markMessageUnread($message_id) {
 		// Login to the service if not already done.
 		$this->_logIn();
