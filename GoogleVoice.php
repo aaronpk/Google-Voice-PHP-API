@@ -144,6 +144,24 @@ class GoogleVoice {
 	}
 
 	/**
+	 * Removes a note from a message in a Google Voice Inbox or Voicemail.
+	 * @param $message_id The id of the message to update.
+	 */
+	public function removeNote($message_id, $note) {
+		// Login to the service if not already done.
+		$this->_logIn();
+
+		// Send HTTP POST request.
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/deletenote/');
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
+			'_rnr_se' => $this->_rnr_se,
+			'id' => $message_id,
+			));
+		curl_exec($this->_ch);
+	}
+
+	/**
 	 * Get all of the unread SMS messages in a Google Voice inbox.
 	 */
 	public function getUnreadSMS() {
