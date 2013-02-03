@@ -1,48 +1,42 @@
 <?php
+/*
+	As of February 3rd, 2013 all functionality
+	is once again working.
+*/
+
 include('GoogleVoice.php');
 
-$gv = new GoogleVoice('your.name', 'password');
+// NOTE: Full email address required.
+$gv = new GoogleVoice('your.email@domain.com', 'password');
 
-// call a phone from one of your forwarding phones
+// Call a phone from one of your forwarding phones.
 $gv->callNumber('9995551212', '5558675309', 'mobile');
 
-// send an SMS to a phone number
+// Send an SMS to a phone number.
 $gv->sendSMS('9995551212', 'Sending a message!');
 
-// fetch new voicemails
-$voicemails = $gv->getNewVoicemail();
-
+// Get all unread SMSs from your Google Voice Inbox.
+$sms = $gv->getUnreadSMS();
 $msgIDs = array();
-foreach( $voicemails as $s )
-{
-        preg_match('/\+1([0-9]{3})([0-9]{3})([0-9]{4})/', $s['phoneNumber'], $match);
-        $phoneNumber = '(' . $match[1] . ') ' . $match[2] . '-'. $match[3];
-        echo 'Message from: ' . $phoneNumber . ' on ' . $s['date'] . "\n" . $s['message'] . "\n\n";
-
-        if( !in_array($s['msgID'], $msgIDs) )
-        {
-                // mark the conversation as "read" in google voice
-                $gv->markSMSRead($s['msgID']);
-                $msgIDs[] = $s['msgID'];
-        }
+foreach($sms as $s) {
+	echo 'Message from: ' . $s['phoneNumber'] . ' on ' . $s['date'] . ': ' . $s['message'] . "<br><br>\n";
+	if(!in_array($s['msgID'], $msgIDs)) {
+		// Mark the message as read in your Google Voice Inbox.
+		$gv->markMessageRead($s['msgID']);
+		$msgIDs[] = $s['msgID'];
+	}
 }
 
-// get all new SMSs
-$sms = $gv->getNewSMS();
-
+// Get all unread messages from your Google Voice Voicemail.
+$voice_mails = $gv->getUnreadVoicemail();
 $msgIDs = array();
-foreach( $sms as $s )
-{
-        preg_match('/\+1([0-9]{3})([0-9]{3})([0-9]{4})/', $s['phoneNumber'], $match);
-        $phoneNumber = '(' . $match[1] . ') ' . $match[2] . '-'. $match[3];
-        echo 'Message from: ' . $phoneNumber . ' on ' . $s['date'] . ': ' . $s['message'] . "\n";
-
-        if( !in_array($s['msgID'], $msgIDs) )
-        {
-                // mark the conversation as "read" in google voice
-                $gv->markSMSRead($s['msgID']);
-                $msgIDs[] = $s['msgID'];
-        }
+foreach($voice_mails as $v) {
+	echo 'Message from: ' . $v['phoneNumber'] . ' on ' . $v['date'] . ': ' . $v['message'] . "<br><br>\n";
+	if(!in_array($v['msgID'], $msgIDs)) {
+		// Mark this message as read in your Google Voice Voicemail.
+		$gv->markMessageRead($v['msgID']);
+		$msgIDs[] = $v['msgID'];
+	}
 }
 
 ?>
