@@ -1,4 +1,9 @@
 <?php
+/*
+	As of February 3rd, 2013 all functionality
+	is once again working.
+*/
+
 include('GoogleVoice.php');
 
 // NOTE: Full email address required.
