@@ -1,7 +1,6 @@
 <?php
 
-class GoogleVoice
-{
+class GoogleVoice {
 	// Our credentials
 	private $_login;
 	private $_pass;
@@ -16,11 +15,9 @@ class GoogleVoice
 	// Are we logged in already?
 	private $_loggedIn = FALSE;
 
-	public function __construct($login, $pass)
-	{
+	public function __construct($login, $pass) {
 		$this->_login = $login;
 		$this->_pass = $pass;
-
 		$this->_cookieFile = '/tmp/gvCookies.txt';
 
 		$this->_ch = curl_init();
@@ -30,39 +27,40 @@ class GoogleVoice
 		curl_setopt($this->_ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)");
 	}
 	
-	private function _logIn()
-	{
+	private function _logIn() {
 		global $conf;
 
-		if( $this->_loggedIn )
+		if($this->_loggedIn)
 			return TRUE;
 
 		// fetch the login page
-		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/accounts/ServiceLogin?passive=true&service=grandcentral');
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://accounts.google.com/ServiceLogin?service=grandcentral&passive=1209600&continue=https://www.google.com/voice&followup=https://www.google.com/voice&ltmpl=open');
 		$html = curl_exec($this->_ch);
 
+		// Grab GALX string.
 		if(preg_match('/name="GALX"\s*value="([^"]+)"/', $html, $match))
 			$GALX = $match[1];
 		else
 			throw new Exception('Could not parse for GALX token');
 
-		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/accounts/ServiceLoginAuth?service=grandcentral');
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://accounts.google.com/ServiceLoginAuth');
 		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
 			'Email' => $this->_login,
+			'GALX' => $GALX,
 			'Passwd' => $this->_pass,
-			'continue' => 'https://www.google.com/voice/account/signin',
+			'continue' => 'https://www.google.com/voice',
+			'followup' => 'https://www.google.com/voice',
 			'service' => 'grandcentral',
-			'GALX' => $GALX
-			));
-	
+			'signIn' => 'Sign in'));
 		$html = curl_exec($this->_ch);
-		if( preg_match('/name="_rnr_se".*?value="(.*?)"/', $html, $match) )
-		{
-			$this->_rnr_se = $match[1];
+
+		// Test if login successful.
+		if(preg_match('/name="_rnr_se" (.*) value="(.*)"/', $html, $matches)) {
+			$this->_rnr_se = $matches[2];
+			$this->_loggedIn = TRUE;
 		}
-		else
-		{
+		else {
 			throw new Exception("Could not log in to Google Voice with username: " . $this->_login);
 		}
 	}
@@ -73,8 +71,7 @@ class GoogleVoice
 	 * @param $fromNumber The 10-digit number on your account to connect the call (no hyphens or spaces)
 	 * @param $phoneType (mobile, work, home, gizmo) The type of phone the $fromNumber is. The call will not be connected without this value. 
 	 */
-	public function callNumber($number, $fromNumber, $phoneType='mobile')
-	{
+	public function callNumber($number, $fromNumber, $phoneType='mobile') {
 		$types = array(
 			'mobile' => 2,
 			'work' => 3,
@@ -90,41 +87,39 @@ class GoogleVoice
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/call/connect/');
 		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
-			'_rnr_se'=>$this->_rnr_se,
-			'forwardingNumber'=>'+1' . $fromNumber,
-			'outgoingNumber'=>$number,
-			'phoneType'=>$types[$phoneType],
-			'remember'=>0,
-			'subscriberNumber'=>'undefined'
+			'_rnr_se' => $this->_rnr_se,
+			'forwardingNumber' => '+1'.$fromNumber,
+			'outgoingNumber' => $number,
+			'phoneType' => $types[$phoneType],
+			'remember' => 0,
+			'subscriberNumber' => 'undefined'
 			));
 		curl_exec($this->_ch);
 	}
 
-	public function sendSMS($number, $message)
-	{
+	public function sendSMS($number, $message) {
 		$this->_logIn();
 
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/sms/send/');
 		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
-			'_rnr_se'=>$this->_rnr_se,
+			'id' => '',
+			'_rnr_se' => $this->_rnr_se,
 			'phoneNumber'=>'+1' . $number,
 			'text'=>$message
 			));
 		curl_exec($this->_ch);
 	}
 	
-	public function getNewSMS()
-	{
+	public function getUnreadSMS() {
 		$this->_logIn();
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/recent/sms/');
 		curl_setopt($this->_ch, CURLOPT_POST, FALSE);
 		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
 		$xml = curl_exec($this->_ch);
 
-		$dom = new DOMDocument();
-
 		// load the "wrapper" xml (contains two elements, json and html)
+		$dom = new DOMDocument();
 		$dom->loadXML($xml);
 		$json = $dom->documentElement->getElementsByTagName("json")->item(0)->nodeValue;
 		$json = json_decode($json);
@@ -137,23 +132,17 @@ class GoogleVoice
 		$xpath = new DOMXPath($dom);
 		
 		$results = array();
-		
-		foreach( $json->messages as $mid=>$convo )
-		{
+		foreach($json->messages as $mid=>$convo) {
 			$elements = $xpath->query("//div[@id='$mid']//div[@class='gc-message-sms-row']");
-			if(!is_null($elements))
-			{
-				if( in_array('unread', $convo->labels) )
-				{
-					foreach($elements as $i=>$element)
-					{
+			if(!is_null($elements)) {
+				if(in_array('unread', $convo->labels)) {
+					foreach($elements as $i=>$element) {
 						$XMsgFrom = $xpath->query("span[@class='gc-message-sms-from']", $element);
 						$msgFrom = '';
 						foreach($XMsgFrom as $m)
 							$msgFrom = trim($m->nodeValue);
 
-						if( $msgFrom != "Me:" )
-						{
+						if($msgFrom != "Me:") {
 							$XMsgText = $xpath->query("span[@class='gc-message-sms-text']", $element);
 							$msgText = '';
 							foreach($XMsgText as $m)
@@ -168,45 +157,20 @@ class GoogleVoice
 						}
 					}
 				}
-				else
-				{
-					//echo "This message is not unread\n";	
-				}
-			}
-			else
-			{
-				//echo "gc-message-sms-row query failed\n";
 			}
 		}
-		
 		return $results;
 	}
-	
-	public function markSMSRead($msgID)
-	{
-		$this->_logIn();
 
-		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/mark/');
-		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
-		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
-			'_rnr_se'=>$this->_rnr_se,
-			'messages'=>$msgID,
-			'read'=>1
-			));
-		curl_exec($this->_ch);
-	}
-
-	public function getNewVoicemail()
-	{
+	public function getReadSMS() {
 		$this->_logIn();
-		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/recent/voicemail/');
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/recent/sms/');
 		curl_setopt($this->_ch, CURLOPT_POST, FALSE);
 		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
 		$xml = curl_exec($this->_ch);
 
-		$dom = new DOMDocument();
-
 		// load the "wrapper" xml (contains two elements, json and html)
+		$dom = new DOMDocument();
 		$dom->loadXML($xml);
 		$json = $dom->documentElement->getElementsByTagName("json")->item(0)->nodeValue;
 		$json = json_decode($json);
@@ -219,45 +183,105 @@ class GoogleVoice
 		$xpath = new DOMXPath($dom);
 		
 		$results = array();
-		
-		foreach( $json->messages as $mid=>$convo )
-		{
-			$elements = $xpath->query("//div[@id='$mid']");
-			if(!is_null($elements))
-			{
-				if( $convo->isRead == false )
-				{
-					$element = $elements->item(0);
-					$XMsg = $xpath->query("//div[@class='gc-message-message-display']", $element);
-					$XMsgPart = $xpath->query("span|a", $XMsg->item(0));
-					
-					$msgText = '';
-					$msgWords = array();
-					foreach($XMsgPart as $m)
-					{
-						$word = $this->_unhtmlentities(trim($m->nodeValue));
-						$msgText .= $word . ' ';
-						if(preg_match('/gc-word-(.+)/', $m->attributes->getNamedItem('class')->textContent, $match))
-							$confidence = $match[1];
-						else
-							$confidence = '';
-						$msgWords[] = array('word'=>$word, 'confidence'=>$confidence);
+		foreach($json->messages as $mid=>$convo) {
+			$elements = $xpath->query("//div[@id='$mid']//div[@class='gc-message-sms-row']");
+			if(!is_null($elements)) {
+				if(!in_array('unread', $convo->labels)) {
+					foreach($elements as $i=>$element) {
+						$XMsgFrom = $xpath->query("span[@class='gc-message-sms-from']", $element);
+						$msgFrom = '';
+						foreach($XMsgFrom as $m)
+							$msgFrom = trim($m->nodeValue);
+
+						if($msgFrom != "Me:") {
+							$XMsgText = $xpath->query("span[@class='gc-message-sms-text']", $element);
+							$msgText = '';
+							foreach($XMsgText as $m)
+								$msgText = trim($m->nodeValue);
+	
+							$XMsgTime = $xpath->query("span[@class='gc-message-sms-time']", $element);
+							$msgTime = '';
+							foreach($XMsgTime as $m)
+								$msgTime = trim($m->nodeValue);
+	
+							$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$msgText, 'date'=>date('Y-m-d H:i:s', strtotime(date('m/d/Y ',intval($convo->startTime/1000)).$msgTime)));
+						}
 					}
-						
-					$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$msgText, 'date'=>date('Y-m-d H:i:s', intval($convo->startTime/1000)), 'words'=>$msgWords);
 				}
-				else
-				{
-					echo "This message ($mid) is not unread\n";
-				}
-			}
-			else
-			{
-				echo "Could not find HTML version of message: $mid\n";
 			}
 		}
-		
 		return $results;
+	}
+
+	public function getUnreadVoicemail() {
+		$this->_logIn();
+
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/recent/voicemail/');
+		curl_setopt($this->_ch, CURLOPT_POST, FALSE);
+		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
+		$xml = curl_exec($this->_ch);
+
+		// load the "wrapper" xml (contains two elements, json and html)
+		$dom = new DOMDocument();
+		$dom->loadXML($xml);
+		$json = $dom->documentElement->getElementsByTagName("json")->item(0)->nodeValue;
+		$json = json_decode($json);
+		
+		$results = array();
+		foreach( $json->messages as $mid=>$convo ) {
+			if( $convo->isRead == false ) {
+				$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$convo->messageText, 'date'=>date('Y-m-d H:i:s', intval($convo->startTime/1000)));
+			}
+		}
+		return $results;
+	}
+
+	public function getReadVoicemail() {
+		$this->_logIn();
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/recent/voicemail/');
+		curl_setopt($this->_ch, CURLOPT_POST, FALSE);
+		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
+		$xml = curl_exec($this->_ch);
+
+		// load the "wrapper" xml (contains two elements, json and html)
+		$dom = new DOMDocument();
+		$dom->loadXML($xml);
+		$json = $dom->documentElement->getElementsByTagName("json")->item(0)->nodeValue;
+		$json = json_decode($json);
+		
+		$results = array();
+		foreach( $json->messages as $mid=>$convo ) {
+			if( $convo->isRead == true ) {
+				$results[] = array('msgID'=>$mid, 'phoneNumber'=>$convo->phoneNumber, 'message'=>$convo->messageText, 'date'=>date('Y-m-d H:i:s', intval($convo->startTime/1000)));
+			}
+		}
+		return $results;
+	}
+
+	public function markMessageRead($msgID) {
+		$this->_logIn();
+
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/mark/');
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
+			'_rnr_se' => $this->_rnr_se,
+			'messages' => $msgID,
+			'read' => '1'
+			));
+		curl_exec($this->_ch);
+	}
+
+	public function markMessageUnread($msgID) {
+		$this->_logIn();
+
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/mark/');
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
+			'_rnr_se' => $this->_rnr_se,
+			'messages' => $msgID,
+			'read' => '0'
+			));
+		curl_exec($this->_ch);
 	}
 	
 	public function dom_dump($obj) {
@@ -281,14 +305,14 @@ class GoogleVoice
 				default:
 					return "Instance of unknown class";
 			}
-		} else {
+		}
+		else {
 			return 'no elements...';
 		}
 		return htmlspecialchars($retval);
 	}
 	
-	private function _unhtmlentities($string)
-	{
+	private function _unhtmlentities($string) {
 		// replace numeric entities
 		$string = preg_replace('~&#x([0-9a-f]+);~ei', 'chr(hexdec("\\1"))', $string);
 		$string = preg_replace('~&#([0-9]+);~e', 'chr("\\1")', $string);
