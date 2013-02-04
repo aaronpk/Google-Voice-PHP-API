@@ -1,8 +1,4 @@
 <?php
-/*
-	As of February 3rd, 2013 all functionality
-	is once again working.
-*/
 
 include('GoogleVoice.php');
 
@@ -19,11 +15,11 @@ $gv->sendSMS('9995551212', 'Sending a message!');
 $sms = $gv->getUnreadSMS();
 $msgIDs = array();
 foreach($sms as $s) {
-	echo 'Message from: ' . $s['phoneNumber'] . ' on ' . $s['date'] . ': ' . $s['message'] . "<br><br>\n";
-	if(!in_array($s['msgID'], $msgIDs)) {
+	echo 'Message from: '.$s->phoneNumber.' on '.$s->displayStartDateTime.': '.$s->messageText."<br><br>\n";
+	if(!in_array($s->id, $msgIDs)) {
 		// Mark the message as read in your Google Voice Inbox.
-		$gv->markMessageRead($s['msgID']);
-		$msgIDs[] = $s['msgID'];
+		$gv->markMessageRead($s->id);
+		$msgIDs[] = $s->id;
 	}
 }
 
@@ -31,11 +27,11 @@ foreach($sms as $s) {
 $voice_mails = $gv->getUnreadVoicemail();
 $msgIDs = array();
 foreach($voice_mails as $v) {
-	echo 'Message from: ' . $v['phoneNumber'] . ' on ' . $v['date'] . ': ' . $v['message'] . "<br><br>\n";
-	if(!in_array($v['msgID'], $msgIDs)) {
-		// Mark this message as read in your Google Voice Voicemail.
-		$gv->markMessageRead($v['msgID']);
-		$msgIDs[] = $v['msgID'];
+	echo 'Message from: '.$v->phoneNumber.' on '.$v->displayStartDateTime.': '.$v->messageText."<br><br>\n";
+	if(!in_array($v->id, $msgIDs)) {
+		// Mark the message as read in your Google Voice Voicemail.
+		$gv->markMessageRead($v->id);
+		$msgIDs[] = $v->id;
 	}
 }
 
