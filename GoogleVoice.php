@@ -20,7 +20,7 @@ class GoogleVoice {
 	public function __construct($login, $pass) {
 		$this->_login = $login;
 		$this->_pass = $pass;
-		$this->_cookie_file = '/tmp/gvCookies.txt';
+		$this->_cookieFile = '/tmp/gvCookies.txt';
 
 		$this->_ch = curl_init();
 		curl_setopt($this->_ch, CURLOPT_COOKIEJAR, $this->_cookieFile);
