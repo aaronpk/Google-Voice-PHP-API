@@ -72,25 +72,58 @@ class GoogleVoice {
 	 * Place a call to $number connecting first to $fromNumber.
 	 * @param $number The 10-digit phone number to call (formatted with parens and hyphens or none).
 	 * @param $fromNumber The 10-digit number on your account to connect the call (no hyphens or spaces).
-	 * @param $phoneType (mobile, work, home, gizmo) The type of phone the $fromNumber is. The call will not be connected without this value. 
+	 * @param $phoneType (mobile, work, home) The type of phone the $fromNumber is. The call will not be connected without this value. 
 	 */
 	public function callNumber($number, $from_number, $phone_type = 'mobile') {
 		$types = array(
 			'mobile' => 2,
 			'work' => 3,
-			'home' => 1,
-			'gizmo' => 7
+			'home' => 1
 		);
 	
 		// Make sure phone type is set properly.
 		if(!array_key_exists($phone_type, $types))
-			throw new Exception('Phone type must be mobile, work, home or gizmo');
+			throw new Exception('Phone type must be mobile, work, or home');
 		
 		// Login to the service if not already done.
 		$this->_logIn();
 
 		// Send HTTP POST request.
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/call/connect/');
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
+			'_rnr_se' => $this->_rnr_se,
+			'forwardingNumber' => '+1'.$from_number,
+			'outgoingNumber' => $number,
+			'phoneType' => $types[$phone_type],
+			'remember' => 0,
+			'subscriberNumber' => 'undefined'
+			));
+		curl_exec($this->_ch);
+	}
+
+	/**
+	 * Cancel a call to $number connecting first to $fromNumber.
+	 * @param $number The 10-digit phone number to call (formatted with parens and hyphens or none).
+	 * @param $fromNumber The 10-digit number on your account to connect the call (no hyphens or spaces).
+	 * @param $phoneType (mobile, work, home) The type of phone the $fromNumber is. The call will not be connected without this value. 
+	 */
+	public function cancelCall($number, $from_number, $phone_type = 'mobile') {
+		$types = array(
+			'mobile' => 2,
+			'work' => 3,
+			'home' => 1
+		);
+	
+		// Make sure phone type is set properly.
+		if(!array_key_exists($phone_type, $types))
+			throw new Exception('Phone type must be mobile, work, or home');
+		
+		// Login to the service if not already done.
+		$this->_logIn();
+
+		// Send HTTP POST request.
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/call/cancel/');
 		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
 			'_rnr_se' => $this->_rnr_se,
@@ -277,6 +310,24 @@ class GoogleVoice {
 		return $results;
 	}
 
+
+	/**
+	 * Get MP3 of a Google Voice Voicemail.
+	 */
+	public function getVoicemailMP3($message_id) {
+		// Login to the service if not already done.
+		$this->_logIn();
+
+		// Send HTTP POST request.
+		curl_setopt($this->_ch, CURLOPT_URL, "https://www.google.com/voice/media/send_voicemail/$message_id/");
+		curl_setopt($this->_ch, CURLOPT_POST, FALSE);
+		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
+		$results = curl_exec($this->_ch);
+
+		return $results;
+	}
+
+
 	/**
 	 * Mark a message in a Google Voice Inbox or Voicemail as read.
 	 * @param $message_id The id of the message to update.
@@ -347,3 +398,4 @@ class GoogleVoice {
 }
 
 ?>
+
