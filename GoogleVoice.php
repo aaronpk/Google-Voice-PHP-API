@@ -367,6 +367,25 @@ class GoogleVoice {
 			));
 		curl_exec($this->_ch);
 	}
+
+	/**
+	 * Delete a message or conversation.
+	 * @param $message_id The ID of the conversation to delete.
+	 */
+
+	public function deleteMessage($message_id) {
+		$this->_logIn();
+
+		curl_setopt($this->_ch, CURLOPT_URL, 'https://www.google.com/voice/inbox/deleteMessages/');
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, array(
+			'_rnr_se' => $this->_rnr_se,
+			'messages' => $message_id,
+			'trash' => 1
+		));
+
+		curl_exec($this->_ch);
+	}
 	
 	public function dom_dump($obj) {
 		if ($classname = get_class($obj)) {
