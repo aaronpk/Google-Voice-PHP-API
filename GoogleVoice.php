@@ -40,10 +40,16 @@ class GoogleVoice {
 		$html = curl_exec($this->_ch);
 
 		// Parse the returned webpage for the "GALX" token, needed for POST requests.
-		if (preg_match('/name="GALX"\s*type="hidden"\s*value="([^"]+)"/', $html, $match))
-			$GALX = $match[1];
-		else
-			throw new Exception('Could not parse for GALX token');
+        if (preg_match('/name="GALX"\s*type="hidden"\s*value="([^"]+)"/', $html, $match)) {
+            $GALX = $match[1];
+            error_log("got GALX: $GALX");
+        } elseif (preg_match('/type="hidden"\s*name="GALX"\s*value="([^"]+)"/', $html, $match)) {
+			// new swapped order
+            $GALX = $match[1];
+            error_log("got GALX: $GALX");
+        } else {
+            throw new Exception('Could not parse for GALX token: ' . $html);
+        }
 
 		// Send HTTP POST service login request.
 		curl_setopt($this->_ch, CURLOPT_URL, 'https://accounts.google.com/ServiceLoginAuth');
