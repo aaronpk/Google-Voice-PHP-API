@@ -40,7 +40,7 @@ class GoogleVoice {
 			return TRUE;
 
 		// Fetch the Google Voice login page input fields
-		$URL='https://accounts.google.com/ServiceLogin?service=grandcentral&passive=1209600&continue=https://www.google.com/voice&followup=https://www.google.com/voice&ltmpl=open';  //adding login to GET prefills with username "&Email=$this->_login"
+		$URL='https://accounts.google.com/ServiceLogin?service=grandcentral&passive=1209600&continue=https://www.google.com/voice/b/0/redirection/voice&followup=https://www.google.com/voice/b/0/redirection/voice#inbox';  //adding login to GET prefills with username "&Email=$this->_login"
 		curl_setopt($this->_ch, CURLOPT_URL, $URL);
 		$html = curl_exec($this->_ch);
 
