@@ -50,10 +50,10 @@ class GoogleVoice {
 		$postarray = $this->dom_get_input_tags($html);  // Using DOM keeps the order of the name/value from breaking the code.
 
 		// Parse the returned webpage for the "GALX" token, needed for POST requests.
-		if(!isset($postarray['GALX']) || $postarray['GALX']==''){
+		if((!isset($postarray['GALX']) || $postarray['GALX']=='') && (!isset($postarray['gxf']) || $postarray['gxf']=='')){
 			$pi1 = var_export($postarray, TRUE);
-			error_log("Could not parse for GALX token. Inputs from page:\n" . $pi1 . "\n\nHTML from page:" . $html);
-			throw new Exception("Could not parse for GALX token. Inputs from page:\n" . $pi1);
+			error_log("Could not parse for GALX or gxf token. Inputs from page:\n" . $pi1 . "\n\nHTML from page:" . $html);
+			throw new Exception("Could not parse for GALX or gxf token. Inputs from page:\n" . $pi1);
 		}
 
 		$postarray['Email'] = $this->_login;  //Add login to POST array
