@@ -28,7 +28,7 @@ class GoogleVoice {
 		curl_setopt($this->_ch, CURLOPT_COOKIEJAR, $this->_cookieFile);
 		curl_setopt($this->_ch, CURLOPT_FOLLOWLOCATION, TRUE);
 		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
-		curl_setopt($this->_ch, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko");  //was "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)"
+		curl_setopt($this->_ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)");
 	}
 
 
@@ -40,7 +40,7 @@ class GoogleVoice {
 			return TRUE;
 
 		// Fetch the Google Voice login page input fields
-		$URL='https://accounts.google.com/ServiceLogin?service=grandcentral&passive=1209600&continue=https://www.google.com/voice/b/0/redirection/voice&followup=https://www.google.com/voice/b/0/redirection/voice#inbox';  //adding login to GET prefills with username "&Email=$this->_login"
+		$URL='https://gmail.com';
 		curl_setopt($this->_ch, CURLOPT_URL, $URL);
 		$html = curl_exec($this->_ch);
 
@@ -62,6 +62,11 @@ class GoogleVoice {
 		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $postarray);
 		$html = curl_exec($this->_ch);
 
+		// Now redirect to the old grand central page.
+		$URL='https://accounts.google.com/ServiceLogin?service=grandcentral&passive=1209600&continue=https://www.google.com/voice/b/0/redirection/voice&followup=https://www.google.com/voice/b/0/redirection/voice#inbox';
+		curl_setopt($this->_ch, CURLOPT_URL, $URL);
+                $html = curl_exec($this->_ch);
+		
 		// Test if the service login was successful.
 		$postarray = $this->dom_get_input_tags($html);  // Using DOM keeps the order of the name/value from breaking the code.
 		if(isset($postarray['_rnr_se']) && $postarray['_rnr_se']!='') {
