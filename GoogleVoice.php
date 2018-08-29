@@ -27,6 +27,8 @@ class GoogleVoice {
 		$this->_ch = curl_init();
 		curl_setopt($this->_ch, CURLOPT_COOKIEJAR, $this->_cookieFile);
 		curl_setopt($this->_ch, CURLOPT_FOLLOWLOCATION, TRUE);
+		curl_setopt($this->_ch, CURLOPT_TIMEOUT, 20); // i just have a shitty connection :(
+		curl_setopt($this->_ch, CURLOPT_CONNECTTIMEOUT, 10);
 		curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, TRUE);
 		curl_setopt($this->_ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)");
 	}
@@ -50,7 +52,7 @@ class GoogleVoice {
 		$postarray = $this->dom_get_input_tags($html);  // Using DOM keeps the order of the name/value from breaking the code.
 
 		// Parse the returned webpage for the "GALX" token, needed for POST requests.
-		if(!isset($postarray['GALX']) || $postarray['GALX']==''){
+		if((!isset($postarray['GALX']) || $postarray['GALX']=='') && (!isset($postarray['gxf']) || $postarray['gxf']=='')){
 			$pi1 = var_export($postarray, TRUE);
 			error_log("Could not parse for GALX token. Inputs from page:\n" . $pi1 . "\n\nHTML from page:" . $html);
 			throw new Exception("Could not parse for GALX token. Inputs from page:\n" . $pi1);
