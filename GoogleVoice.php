@@ -46,8 +46,16 @@ class GoogleVoice {
 		curl_setopt($this->_ch, CURLOPT_URL, $URL);
 		$html = curl_exec($this->_ch);
 
+		$postarray ['Email'] = $this->_login;
 		// Send HTTP POST service login request using captured input information.
-		$URL='https://accounts.google.com/signin/challenge/sl/password';  // This is the second page of the two page signin
+		$URL='https://accounts.google.com/signin/v1/lookup';
+		curl_setopt($this->_ch, CURLOPT_URL, $URL);
+		curl_setopt($this->_ch, CURLOPT_POST, TRUE);
+		curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $postarray);
+		$html = curl_exec($this->_ch);
+		
+		// Send HTTP POST service login request using captured input information.
+		$URL='https://accounts.google.com/signin/challenge/sl/password';  // This is the third page of the three page signin
 		curl_setopt($this->_ch, CURLOPT_URL, $URL);
 		$postarray = $this->dom_get_input_tags($html);  // Using DOM keeps the order of the name/value from breaking the code.
 
