@@ -5,7 +5,7 @@ Google Voice PHP API
 
 An API to interact with Google Voice using PHP.
 
-Currently the API can place calls, cancel previously placed calls, send and
+Currently, the API can place calls, cancel previously placed calls, send and
 receive SMS messages, add a note to or remove a note from a message or voicemail,
 mark a message or voicemail as read or unread, and download transcriptions and/or
 MP3 files of voicemail. Feel free to implement new functionality and send me your
@@ -33,7 +33,7 @@ values included:
 	$msg->children = 
 
 Note: Receiving SMSs and voicemails is mostly unnecessary via this API since
-Google now allows SMSs to be forwarded to an email address. It is  a better
+Google now allows SMSs to be forwarded to an email address. It is a better
 idea to parse those incoming emails with a script.
 
 SMS and Voice Integration
