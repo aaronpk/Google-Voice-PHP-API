@@ -60,3 +60,4 @@ foreach($voice_mails as $v) {
 }
 
 ?>
+<!-- Thanks -->
